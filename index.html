@@ -72,6 +72,18 @@
         <span class="nav-label">Speaking</span>
         <span class="nav-badge active-badge">Active</span>
       </button>
+
+      <button class="nav-item" id="nav-translate" onclick="switchTab('translate')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/>
+            <path d="M2 5h12"/><path d="M7 2h1"/>
+            <path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>
+          </svg>
+        </span>
+        <span class="nav-label">Translate</span>
+        <span class="nav-badge" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);color:white">New</span>
+      </button>
     </nav>
 
     <div class="sidebar-footer">
@@ -222,6 +234,67 @@
         <div class="coming-soon-icon">✍️</div>
         <h2>Writing</h2>
         <p>Coming Soon — Stay tuned!</p>
+      </div>
+    </div>
+
+    <!-- Translate Tab -->
+    <div class="tab-content" id="tab-translate">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1 class="page-title">Translate &amp; Improve</h1>
+          <p class="page-subtitle">Translate English text and get grammar suggestions powered by AI</p>
+        </div>
+      </div>
+
+      <div class="translate-section">
+
+        <!-- Quick Translation Card -->
+        <div class="translate-card">
+          <div class="translate-card-title">
+            <span class="translate-card-icon">🌐</span>
+            Quick Translation
+          </div>
+          <textarea id="translate-input" class="form-input form-textarea" placeholder="Enter an English word or sentence to translate..." rows="3"></textarea>
+          <div class="translate-actions">
+            <button class="btn btn-primary" id="btn-translate" onclick="translateText()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+              Translate to Vietnamese
+            </button>
+            <button class="btn btn-secondary" onclick="speakText(document.getElementById('translate-input').value)" title="Read English aloud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              Listen
+            </button>
+          </div>
+          <div id="translate-result" class="translate-result hidden"></div>
+          <div id="translate-result-actions" class="translate-actions hidden">
+            <button class="btn btn-secondary" onclick="speakText(document.getElementById('translate-result').textContent, 'vi-VN')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              Nghe tiếng Việt
+            </button>
+          </div>
+        </div>
+
+        <!-- Grammar & Expression Card -->
+        <div class="translate-card">
+          <div class="translate-card-title">
+            <span class="translate-card-icon">✍️</span>
+            Grammar &amp; Expression Checker
+          </div>
+          <p class="translate-card-desc">Nhập câu tiếng Anh của bạn — AI sẽ sửa lỗi ngữ pháp và đề xuất cách diễn đạt tốt hơn.</p>
+          <textarea id="grammar-input" class="form-input form-textarea" placeholder="e.g. I will go there in the future for see my friend..." rows="3"></textarea>
+          <div class="translate-actions">
+            <button class="btn btn-ai" id="btn-improve" onclick="improveGrammar()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Check &amp; Improve
+            </button>
+            <button class="btn btn-secondary" onclick="speakText(document.getElementById('grammar-input').value)" title="Read input aloud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              Listen
+            </button>
+          </div>
+          <div id="grammar-result" class="hidden"></div>
+        </div>
+
       </div>
     </div>
 

@@ -258,6 +258,44 @@ async function updatePartCounts() {
 }
 
 // ===== RENDER QUESTIONS =====
+function renderOneQuestion(q, idx) {
+  const hasAnswer = q.answer && q.answer.trim();
+  return `
+    <div class="question-card ${hasAnswer ? 'answered-card' : ''}" id="qcard-${q.id}">
+      <div class="question-header">
+        <div class="question-number">${idx + 1}</div>
+        <div class="question-text" id="qtext-${q.id}">${escapeHtml(q.question)}</div>
+        <textarea class="question-edit-input" id="qedit-${q.id}" rows="2">${escapeHtml(q.question)}</textarea>
+        <div class="question-actions">
+          <button class="q-btn toggle-answer ${hasAnswer ? 'answered' : ''}" onclick="toggleAnswer('${q.id}')" title="${hasAnswer ? 'View answer' : 'No answer yet'}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="q-btn edit-btn" onclick="toggleEdit('${q.id}')" title="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          </button>
+          <button class="q-btn save-btn hidden" id="save-btn-${q.id}" onclick="saveQuestion('${q.id}')" title="Save">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button class="q-btn delete-btn" onclick="deleteQuestion('${q.id}')" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="question-answer-wrapper" id="qanswer-${q.id}">
+        <div class="answer-header">
+          <div class="answer-label">Your Answer</div>
+          <button class="speak-btn ${hasAnswer ? '' : 'hidden'}" id="speak-btn-${q.id}" onclick="speakAnswer('${q.id}')" title="Read answer aloud">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+        </div>
+        ${hasAnswer
+          ? `<div class="answer-text" id="atext-${q.id}">${escapeHtml(q.answer)}</div>`
+          : `<div class="answer-placeholder" id="atext-${q.id}">No answer yet. Click edit to add one.</div>`}
+        <textarea class="answer-edit-textarea" id="aedit-${q.id}" rows="4" placeholder="Write your answer...">${escapeHtml(q.answer || '')}</textarea>
+      </div>
+    </div>`;
+}
+
 function renderQuestions() {
   const list = document.getElementById('questionsList');
   const info = document.getElementById('questions-info');
@@ -275,50 +313,7 @@ function renderQuestions() {
     return;
   }
 
-  list.innerHTML = currentQuestions.map((q, idx) => {
-    const hasAnswer = q.answer && q.answer.trim();
-    return `
-      <div class="question-card ${hasAnswer ? 'answered-card' : ''}" id="qcard-${q.id}">
-        <div class="question-header">
-          <div class="question-number">${idx + 1}</div>
-          <div class="question-text" id="qtext-${q.id}">${escapeHtml(q.question)}</div>
-          <textarea class="question-edit-input" id="qedit-${q.id}" rows="2">${escapeHtml(q.question)}</textarea>
-          <div class="question-actions">
-            <button class="q-btn toggle-answer ${hasAnswer ? 'answered' : ''}" onclick="toggleAnswer('${q.id}')" title="${hasAnswer ? 'View answer' : 'No answer yet'}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-            <button class="q-btn edit-btn" onclick="toggleEdit('${q.id}')" title="Edit">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-              </svg>
-            </button>
-            <button class="q-btn save-btn hidden" id="save-btn-${q.id}" onclick="saveQuestion('${q.id}')" title="Save">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </button>
-            <button class="q-btn delete-btn" onclick="deleteQuestion('${q.id}')" title="Delete">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4h6v2"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="question-answer-wrapper" id="qanswer-${q.id}">
-          <div class="answer-label">Your Answer</div>
-          ${hasAnswer
-        ? `<div class="answer-text" id="atext-${q.id}">${escapeHtml(q.answer)}</div>`
-        : `<div class="answer-placeholder" id="atext-${q.id}">No answer yet. Click edit to add one.</div>`}
-          <textarea class="answer-edit-textarea" id="aedit-${q.id}" rows="4" placeholder="Write your answer...">${escapeHtml(q.answer || '')}</textarea>
-        </div>
-      </div>`;
-  }).join('');
+  list.innerHTML = currentQuestions.map((q, idx) => renderOneQuestion(q, idx)).join('');
 }
 
 // ===== TOGGLE ANSWER =====
@@ -357,7 +352,7 @@ window.toggleEdit = (qId) => {
   }
 };
 
-// ===== SAVE QUESTION =====
+// ===== SAVE QUESTION (no full reload) =====
 window.saveQuestion = async (qId) => {
   const newQuestion = document.getElementById(`qedit-${qId}`).value.trim();
   const newAnswer = document.getElementById(`aedit-${qId}`).value.trim();
@@ -367,12 +362,30 @@ window.saveQuestion = async (qId) => {
   try {
     const qDoc = doc(db, 'topics', currentTopicId, `part${currentPart}`, qId);
     await updateDoc(qDoc, { question: newQuestion, answer: newAnswer, updatedAt: Date.now() });
-
-    // Update topic part stats
     await syncTopicStats();
 
-    showToast('Saved!', 'success');
-    await loadQuestions();
+    // Update local state
+    const qIdx = currentQuestions.findIndex(q => q.id === qId);
+    if (qIdx !== -1) {
+      currentQuestions[qIdx] = { ...currentQuestions[qIdx], question: newQuestion, answer: newAnswer };
+    }
+
+    // Replace only this card in DOM — no full reload!
+    const cardEl = document.getElementById(`qcard-${qId}`);
+    if (cardEl && qIdx !== -1) {
+      cardEl.outerHTML = renderOneQuestion(currentQuestions[qIdx], qIdx);
+    }
+
+    // Keep answer section visible after save
+    const wrapper = document.getElementById(`qanswer-${qId}`);
+    if (wrapper) wrapper.classList.add('visible');
+
+    // Update "X / Y answered" counter
+    const answered = currentQuestions.filter(q => q.answer && q.answer.trim()).length;
+    document.getElementById('questions-info').textContent = `${answered} / ${currentQuestions.length} answered`;
+
+    updatePartCounts();
+    showToast('Saved! ✓', 'success');
   } catch (err) {
     console.error(err);
     showToast('Failed to save', 'error');
@@ -724,6 +737,147 @@ window.saveSettings = () => {
 window.toggleKeyVisibility = (inputId) => {
   const input = document.getElementById(inputId);
   input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+// ===== TEXT-TO-SPEECH =====
+window.speakText = (text, lang = 'en-US') => {
+  if (!('speechSynthesis' in window)) {
+    showToast('Text-to-speech not supported in this browser', 'error');
+    return;
+  }
+  if (!text || !text.trim()) { showToast('No text to read', 'error'); return; }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text.trim());
+  utterance.lang = lang;
+  utterance.rate = 0.88;
+  utterance.pitch = 1;
+  window.speechSynthesis.speak(utterance);
+};
+
+window.speakAnswer = (qId) => {
+  const atextEl = document.getElementById(`atext-${qId}`);
+  const speakBtn = document.getElementById(`speak-btn-${qId}`);
+  if (!atextEl) return;
+  const text = atextEl.textContent;
+  if (!text || text.includes('No answer yet')) {
+    showToast('No answer to read', 'error');
+    return;
+  }
+  // Toggle: if already speaking, stop
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.speak-btn.speaking').forEach(b => b.classList.remove('speaking'));
+    return;
+  }
+  if (speakBtn) speakBtn.classList.add('speaking');
+  const utterance = new SpeechSynthesisUtterance(text.trim());
+  utterance.lang = 'en-US';
+  utterance.rate = 0.88;
+  utterance.onend = () => { if (speakBtn) speakBtn.classList.remove('speaking'); };
+  utterance.onerror = () => { if (speakBtn) speakBtn.classList.remove('speaking'); };
+  window.speechSynthesis.speak(utterance);
+};
+
+// ===== TRANSLATE TAB =====
+async function callDeepSeek(prompt) {
+  const apiKey = localStorage.getItem('deepseek-api-key');
+  if (!apiKey) {
+    showToast('Please set your DeepSeek API key in Settings', 'error');
+    openModal('modal-settings');
+    throw new Error('No API key');
+  }
+  const res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.4, max_tokens: 800 }),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  const data = await res.json();
+  return data.choices[0].message.content.trim();
+}
+
+window.translateText = async () => {
+  const text = document.getElementById('translate-input').value.trim();
+  if (!text) { showToast('Please enter text to translate', 'error'); return; }
+
+  const resultEl = document.getElementById('translate-result');
+  const actionsEl = document.getElementById('translate-result-actions');
+
+  resultEl.classList.remove('hidden');
+  resultEl.className = 'translate-result loading';
+  resultEl.innerHTML = '<div class="spinner"></div> Translating...';
+  actionsEl.classList.add('hidden');
+
+  try {
+    const translation = await callDeepSeek(`Dịch đoạn văn tiếng Anh sau sang tiếng Việt. Chỉ trả lời bản dịch, không giải thích:\n\n${text}`);
+    resultEl.className = 'translate-result';
+    resultEl.textContent = translation;
+    actionsEl.classList.remove('hidden');
+  } catch (err) {
+    if (err.message !== 'No API key') {
+      resultEl.className = 'translate-result';
+      resultEl.textContent = 'Translation failed: ' + err.message;
+    } else {
+      resultEl.classList.add('hidden');
+    }
+  }
+};
+
+window.improveGrammar = async () => {
+  const text = document.getElementById('grammar-input').value.trim();
+  if (!text) { showToast('Please enter a sentence to check', 'error'); return; }
+
+  const resultEl = document.getElementById('grammar-result');
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="translate-result loading"><div class="spinner"></div> AI is analysing...</div>';
+
+  const prompt = `Đây là câu tiếng Anh của người dùng: "${text}"
+
+Hãy phân tích và trả lời theo đúng format JSON sau (không thêm gì ngoài JSON):
+{
+  "corrected": "câu đã sửa lỗi ngữ pháp",
+  "explanation": "giải thích ngắn các lỗi đã sửa bằng tiếng Việt",
+  "alternatives": ["cách diễn đạt tốt hơn 1", "cách diễn đạt tốt hơn 2"]
+}`;
+
+  try {
+    const raw = await callDeepSeek(prompt);
+    // Extract JSON from response
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Invalid response format');
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    const alts = Array.isArray(parsed.alternatives)
+      ? parsed.alternatives.map(a => `<div class="grammar-speak-row"><span>${escapeHtml(a)}</span><button class="speak-btn" onclick="speakText('${a.replace(/'/g, "\\'")}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button></div>`).join('')
+      : escapeHtml(parsed.alternatives || '');
+
+    resultEl.innerHTML = `
+      <div class="grammar-result-inner">
+        <div class="grammar-block corrected">
+          <div class="grammar-block-label">✅ Corrected</div>
+          <div class="grammar-speak-row">
+            <span>${escapeHtml(parsed.corrected)}</span>
+            <button class="speak-btn" onclick="speakText('${(parsed.corrected || '').replace(/'/g, "\\'")}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="grammar-block explanation">
+          <div class="grammar-block-label">💡 Giải thích</div>
+          ${escapeHtml(parsed.explanation)}
+        </div>
+        <div class="grammar-block alternatives">
+          <div class="grammar-block-label">🌟 Diễn đạt tốt hơn</div>
+          ${alts}
+        </div>
+      </div>`;
+  } catch (err) {
+    if (err.message !== 'No API key') {
+      resultEl.innerHTML = `<div class="translate-result">Failed: ${escapeHtml(err.message)}</div>`;
+    } else {
+      resultEl.classList.add('hidden');
+    }
+  }
 };
 
 // ===== MODAL HELPERS =====
