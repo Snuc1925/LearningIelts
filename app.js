@@ -264,7 +264,7 @@ function renderOneQuestion(q, idx) {
     <div class="question-card ${hasAnswer ? 'answered-card' : ''}" id="qcard-${q.id}">
       <div class="question-header">
         <div class="question-number">${idx + 1}</div>
-        <div class="question-text" id="qtext-${q.id}">${escapeHtml(q.question)}</div>
+        <div class="question-text" id="qtext-${q.id}" onclick="toggleAnswer('${q.id}')">${escapeHtml(q.question)}</div>
         <textarea class="question-edit-input" id="qedit-${q.id}" rows="2">${escapeHtml(q.question)}</textarea>
         <div class="question-actions">
           <button class="q-btn toggle-answer ${hasAnswer ? 'answered' : ''}" onclick="toggleAnswer('${q.id}')" title="${hasAnswer ? 'View answer' : 'No answer yet'}">
@@ -880,7 +880,46 @@ Hãy phân tích và trả lời theo đúng format JSON sau (không thêm gì n
   }
 };
 
-// ===== MODAL HELPERS =====
+// ===== SELECTION TTS (eJoy Style) =====
+let selectedTextToSpeak = "";
+const floatingSpeakBtn = document.getElementById('floating-speak-btn');
+
+document.addEventListener('mouseup', (e) => {
+  // Delay a bit to let the selection finish
+  setTimeout(() => {
+    const selection = window.getSelection();
+    const text = selection.toString().trim();
+
+    if (text && text.length > 0) {
+      selectedTextToSpeak = text;
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      // Position the button above the selection
+      floatingSpeakBtn.style.left = `${rect.left + (rect.width / 2) - 16}px`;
+      floatingSpeakBtn.style.top = `${rect.top + window.scrollY - 40}px`;
+      floatingSpeakBtn.classList.remove('hidden');
+    } else {
+      // Don't hide if we clicked the button itself
+      if (!e.target.closest('#floating-speak-btn')) {
+        floatingSpeakBtn.classList.add('hidden');
+      }
+    }
+  }, 10);
+});
+
+floatingSpeakBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (selectedTextToSpeak) {
+    window.speakText(selectedTextToSpeak);
+    floatingSpeakBtn.classList.add('hidden');
+    window.getSelection().removeAllRanges(); // Clear selection
+  }
+});
+
+// Hide button on scroll or resize
+window.addEventListener('scroll', () => floatingSpeakBtn.classList.add('hidden'));
+window.addEventListener('resize', () => floatingSpeakBtn.classList.add('hidden'));
 window.openModal = (id) => {
   document.getElementById(id).classList.add('open');
 };
