@@ -278,13 +278,13 @@ function renderQuestions() {
   list.innerHTML = currentQuestions.map((q, idx) => {
     const hasAnswer = q.answer && q.answer.trim();
     return `
-      <div class="question-card" id="qcard-${q.id}">
+      <div class="question-card ${hasAnswer ? 'answered-card' : ''}" id="qcard-${q.id}">
         <div class="question-header">
           <div class="question-number">${idx + 1}</div>
           <div class="question-text" id="qtext-${q.id}">${escapeHtml(q.question)}</div>
           <textarea class="question-edit-input" id="qedit-${q.id}" rows="2">${escapeHtml(q.question)}</textarea>
           <div class="question-actions">
-            <button class="q-btn toggle-answer ${hasAnswer ? 'answered' : ''}" onclick="toggleAnswer('${q.id}')" title="Toggle answer">
+            <button class="q-btn toggle-answer ${hasAnswer ? 'answered' : ''}" onclick="toggleAnswer('${q.id}')" title="${hasAnswer ? 'View answer' : 'No answer yet'}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
@@ -313,8 +313,8 @@ function renderQuestions() {
         <div class="question-answer-wrapper" id="qanswer-${q.id}">
           <div class="answer-label">Your Answer</div>
           ${hasAnswer
-            ? `<div class="answer-text" id="atext-${q.id}">${escapeHtml(q.answer)}</div>`
-            : `<div class="answer-placeholder" id="atext-${q.id}">No answer yet. Click edit to add one.</div>`}
+        ? `<div class="answer-text" id="atext-${q.id}">${escapeHtml(q.answer)}</div>`
+        : `<div class="answer-placeholder" id="atext-${q.id}">No answer yet. Click edit to add one.</div>`}
           <textarea class="answer-edit-textarea" id="aedit-${q.id}" rows="4" placeholder="Write your answer...">${escapeHtml(q.answer || '')}</textarea>
         </div>
       </div>`;
@@ -487,8 +487,29 @@ window.generateWithAI = async () => {
 
   const count = parseInt(document.getElementById('ai-count').value) || 5;
   const existingQuestions = currentQuestions.map(q => `- ${q.question}`).join('\n');
+  const noExisting = existingQuestions ? existingQuestions : '(chưa có câu hỏi nào)';
 
-  const prompt = `Tạo cho tôi ${count} câu hỏi về chủ đề "${currentTopicName}" trong bài Speaking Part ${currentPart} của IELTS. Chỉ liệt kê câu hỏi, mỗi câu một dòng, bắt đầu bằng số thứ tự. Không thêm giải thích hay lời dẫn. Không trùng với các câu hỏi đã có sau:\n${existingQuestions || '(chưa có câu hỏi nào)'}`;
+  let prompt;
+  if (currentPart === 2) {
+    // Part 2: cue card format with "You should say"
+    prompt = `Tạo cho tôi ${count} câu hỏi dạng Cue Card về chủ đề "${currentTopicName}" trong bài IELTS Speaking Part 2.
+Mỗi câu hỏi phải theo đúng format chuẩn IELTS như ví dụ sau:
+
+Describe a time when you helped someone.
+You should say:
+  - who you helped
+  - what the situation was
+  - how you helped them
+and explain how you felt afterwards.
+
+Chỉ liệt kê các câu hỏi, đánh số thứ tự. Không thêm giải thích. Không trùng với:\n${noExisting}`;
+  } else if (currentPart === 1) {
+    // Part 1: short conversational questions
+    prompt = `Tạo cho tôi ${count} câu hỏi ngắn về chủ đề "${currentTopicName}" cho IELTS Speaking Part 1. Đây là các câu hỏi giao tiếp ngắn hỏi về kinh nghiệm, sở thích cá nhân (không phải dạng cue card). Chỉ liệt kê câu hỏi, đánh số thứ tự. Không trùng với:\n${noExisting}`;
+  } else {
+    // Part 3: discussion/abstract questions
+    prompt = `Tạo cho tôi ${count} câu hỏi thảo luận học thuật về chủ đề "${currentTopicName}" cho IELTS Speaking Part 3. Đây là các câu hỏi mang tính phân tích, so sánh, dự đoán xu hướng xã hội. Chỉ liệt kê câu hỏi, đánh số thứ tự. Không trùng với:\n${noExisting}`;
+  }
 
   document.getElementById('ai-loading').classList.remove('hidden');
   document.getElementById('ai-preview').classList.add('hidden');
@@ -513,10 +534,29 @@ window.generateWithAI = async () => {
     const data = await res.json();
     const text = data.choices[0].message.content;
 
-    // Parse lines into questions
-    generatedAIQuestions = text.split('\n')
-      .map(line => line.replace(/^\d+[\.\)]\s*/, '').trim())
-      .filter(line => line.length > 5);
+    // Parse lines into questions - handle multi-line cue card format for Part 2
+    if (currentPart === 2) {
+      // For Part 2, group lines into cue card blocks (each block starts with "Describe/Talk/Explain...")
+      const blocks = [];
+      let current = [];
+      for (const line of text.split('\n')) {
+        const stripped = line.replace(/^\d+[\.\)]\s*/, '').trim();
+        if (!stripped) continue;
+        // New cue card starts when we see a numbered item or a "Describe/Talk/Explain" line
+        if (/^\d+[\.\)]/.test(line) && current.length > 0) {
+          blocks.push(current.join('\n'));
+          current = [stripped];
+        } else {
+          current.push(stripped);
+        }
+      }
+      if (current.length > 0) blocks.push(current.join('\n'));
+      generatedAIQuestions = blocks.filter(b => b.length > 5);
+    } else {
+      generatedAIQuestions = text.split('\n')
+        .map(line => line.replace(/^\d+[\.\)]\s*/, '').trim())
+        .filter(line => line.length > 5);
+    }
 
     document.getElementById('ai-loading').classList.add('hidden');
     renderAIQuestions();
@@ -578,6 +618,92 @@ window.importAIQuestions = async () => {
     await loadQuestions();
   } catch (err) {
     showToast('Import failed', 'error');
+  }
+};
+
+// ===== EXPORT TO PDF =====
+window.exportAllQuestions = async () => {
+  showToast('Preparing export...', 'info');
+
+  try {
+    // Fetch all topics
+    const topicsRef = collection(db, 'topics');
+    const topicsSnap = await getDocs(query(topicsRef, orderBy('createdAt')));
+    const topics = topicsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Build HTML content
+    let html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IELTS Speaking — All Questions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1e3a5f; background: #fff; padding: 32px; max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 26px; font-weight: 800; color: #1e3a5f; margin-bottom: 6px; }
+    .subtitle { font-size: 14px; color: #8aabce; margin-bottom: 32px; }
+    .topic-section { margin-bottom: 32px; break-inside: avoid; }
+    .topic-title { font-size: 18px; font-weight: 700; color: #2563eb; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 16px; }
+    .part-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #8b5cf6; margin: 12px 0 8px; }
+    .question-item { display: flex; gap: 12px; margin-bottom: 12px; border: 1px solid #e2eeff; border-radius: 8px; overflow: hidden; }
+    .q-num { background: #3b82f6; color: white; font-size: 12px; font-weight: 700; width: 28px; min-width: 28px; display: flex; align-items: flex-start; justify-content: center; padding-top: 12px; }
+    .q-body { padding: 10px 12px; flex: 1; }
+    .q-text { font-size: 14px; font-weight: 500; line-height: 1.6; white-space: pre-wrap; }
+    .q-answer { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2eeff; font-size: 13px; color: #4a6fa5; line-height: 1.7; white-space: pre-wrap; }
+    .q-answer-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #22c55e; margin-bottom: 4px; }
+    .question-item.answered { border-left: 3px solid #22c55e; }
+    .question-item.answered .q-num { background: #16a34a; }
+    .no-questions { font-size: 13px; color: #8aabce; font-style: italic; padding: 8px 0; }
+    @media print { body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <h1>🎤 IELTS Speaking</h1>
+  <p class="subtitle">Exported on ${new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+`;
+
+    for (const topic of topics) {
+      html += `<div class="topic-section"><div class="topic-title">${escapeHtml(topic.name)}</div>`;
+
+      for (let p = 1; p <= 3; p++) {
+        const qRef = collection(db, 'topics', topic.id, `part${p}`);
+        const qSnap = await getDocs(query(qRef, orderBy('createdAt')));
+        const questions = qSnap.docs.map(d => d.data());
+
+        if (questions.length === 0) continue;
+
+        html += `<div class="part-label">Part ${p}</div>`;
+        questions.forEach((q, i) => {
+          const hasAnswer = q.answer && q.answer.trim();
+          html += `
+            <div class="question-item ${hasAnswer ? 'answered' : ''}">
+              <div class="q-num">${i + 1}</div>
+              <div class="q-body">
+                <div class="q-text">${escapeHtml(q.question)}</div>
+                ${hasAnswer ? `<div class="q-answer"><div class="q-answer-label">Answer</div>${escapeHtml(q.answer)}</div>` : ''}
+              </div>
+            </div>`;
+        });
+      }
+      html += `</div>`;
+    }
+
+    html += `</body></html>`;
+
+    // Open in new window and print
+    const win = window.open('', '_blank', 'width=900,height=700');
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => {
+      setTimeout(() => win.print(), 300);
+    };
+
+    showToast('Export ready! Choose "Save as PDF" in print dialog.', 'success');
+  } catch (err) {
+    console.error(err);
+    showToast('Export failed: ' + err.message, 'error');
   }
 };
 
