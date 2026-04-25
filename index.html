@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IELTS Journey — Learning Tracker</title>
+  <meta name="description" content="Track your IELTS learning progress across Reading, Listening, Writing, and Speaking with AI-powered question generation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">IELTS Journey</span>
+          <span class="logo-sub">Learning Tracker</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" id="nav-reading" onclick="switchTab('reading')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Reading</span>
+        <span class="nav-badge coming-soon">Soon</span>
+      </button>
+
+      <button class="nav-item" id="nav-listening" onclick="switchTab('listening')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Listening</span>
+        <span class="nav-badge coming-soon">Soon</span>
+      </button>
+
+      <button class="nav-item" id="nav-writing" onclick="switchTab('writing')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Writing</span>
+        <span class="nav-badge coming-soon">Soon</span>
+      </button>
+
+      <button class="nav-item active" id="nav-speaking" onclick="switchTab('speaking')">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </span>
+        <span class="nav-label">Speaking</span>
+        <span class="nav-badge active-badge">Active</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+        <span class="theme-icon light-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </span>
+        <span class="theme-icon dark-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </span>
+        <span class="theme-label">Toggle Theme</span>
+      </button>
+
+      <button class="settings-btn" onclick="openSettings()" title="API Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93l-1.42 1.42M4.93 4.93l1.42 1.42M19.07 19.07l-1.42-1.42M4.93 19.07l1.42-1.42M12 2v2M12 20v2M2 12h2M20 12h2"/>
+        </svg>
+        <span>API Settings</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Speaking Tab -->
+    <div class="tab-content active" id="tab-speaking">
+      <!-- Topics List View -->
+      <div id="view-topics">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1 class="page-title">Speaking</h1>
+            <p class="page-subtitle">Track your progress across all IELTS Speaking topics</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateTopicModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Topic
+          </button>
+        </div>
+
+        <div class="topics-grid" id="topicsGrid">
+          <!-- Topics rendered by JS -->
+          <div class="topics-loading">
+            <div class="spinner"></div>
+            <p>Loading topics...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topic Detail View -->
+      <div id="view-topic-detail" class="hidden">
+        <div class="page-header">
+          <div class="page-header-left">
+            <button class="btn-back" onclick="goBackToTopics()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              All Topics
+            </button>
+            <h1 class="page-title" id="detail-topic-name"></h1>
+          </div>
+        </div>
+
+        <div class="parts-tabs">
+          <button class="part-tab active" id="part-tab-1" onclick="switchPart(1)">
+            <span class="part-tab-label">Part 1</span>
+            <span class="part-tab-count" id="part1-count">0 / 0</span>
+          </button>
+          <button class="part-tab" id="part-tab-2" onclick="switchPart(2)">
+            <span class="part-tab-label">Part 2</span>
+            <span class="part-tab-count" id="part2-count">0 / 0</span>
+          </button>
+          <button class="part-tab" id="part-tab-3" onclick="switchPart(3)">
+            <span class="part-tab-label">Part 3</span>
+            <span class="part-tab-count" id="part3-count">0 / 0</span>
+          </button>
+        </div>
+
+        <div class="questions-toolbar">
+          <div class="questions-info" id="questions-info"></div>
+          <div class="toolbar-actions">
+            <button class="btn btn-secondary" onclick="openAddQuestionModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Question
+            </button>
+            <button class="btn btn-ai" onclick="openAIModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              Generate with AI
+            </button>
+          </div>
+        </div>
+
+        <div class="questions-list" id="questionsList">
+          <!-- Questions rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Coming Soon Tabs -->
+    <div class="tab-content" id="tab-reading">
+      <div class="coming-soon-page">
+        <div class="coming-soon-icon">📖</div>
+        <h2>Reading</h2>
+        <p>Coming Soon — Stay tuned!</p>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-listening">
+      <div class="coming-soon-page">
+        <div class="coming-soon-icon">🎧</div>
+        <h2>Listening</h2>
+        <p>Coming Soon — Stay tuned!</p>
+      </div>
+    </div>
+    <div class="tab-content" id="tab-writing">
+      <div class="coming-soon-page">
+        <div class="coming-soon-icon">✍️</div>
+        <h2>Writing</h2>
+        <p>Coming Soon — Stay tuned!</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== MODALS ===== -->
+
+  <!-- Create Topic Modal -->
+  <div class="modal-overlay" id="modal-create-topic" onclick="closeModal('modal-create-topic')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create New Topic</h3>
+        <button class="modal-close" onclick="closeModal('modal-create-topic')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="new-topic-name">Topic Name</label>
+          <input type="text" id="new-topic-name" class="form-input" placeholder="e.g., Technology, Health, Travel..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-create-topic')">Cancel</button>
+        <button class="btn btn-primary" onclick="createTopic()">Create Topic</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Question Modal -->
+  <div class="modal-overlay" id="modal-add-question" onclick="closeModal('modal-add-question')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add New Question</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-question')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="new-question-text">Question</label>
+          <textarea id="new-question-text" class="form-input form-textarea" placeholder="Enter your question here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="new-question-answer">Answer (optional)</label>
+          <textarea id="new-question-answer" class="form-input form-textarea" placeholder="Write your sample answer here..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-add-question')">Cancel</button>
+        <button class="btn btn-primary" onclick="addQuestion()">Add Question</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Generate Modal -->
+  <div class="modal-overlay" id="modal-ai" onclick="closeModal('modal-ai')">
+    <div class="modal modal-lg" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="ai-badge">✨ AI</div>
+          <h3>Generate Questions with AI</h3>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-ai')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="ai-config">
+          <div class="form-group">
+            <label for="ai-count">Number of Questions</label>
+            <input type="number" id="ai-count" class="form-input" value="5" min="1" max="20" />
+          </div>
+          <div class="ai-info-box">
+            <div class="ai-info-row">
+              <span class="ai-info-label">Topic:</span>
+              <span class="ai-info-value" id="ai-topic-display"></span>
+            </div>
+            <div class="ai-info-row">
+              <span class="ai-info-label">Part:</span>
+              <span class="ai-info-value" id="ai-part-display"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-preview hidden" id="ai-preview">
+          <div class="ai-preview-header">
+            <h4>Generated Questions</h4>
+            <span class="ai-preview-hint">Select questions to import</span>
+          </div>
+          <div id="ai-questions-list" class="ai-questions-list"></div>
+        </div>
+
+        <div class="ai-loading hidden" id="ai-loading">
+          <div class="ai-spinner"></div>
+          <p>DeepSeek is generating questions...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-ai')">Cancel</button>
+        <button class="btn btn-ai" id="ai-generate-btn" onclick="generateWithAI()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Generate
+        </button>
+        <button class="btn btn-primary hidden" id="ai-import-btn" onclick="importAIQuestions()">
+          Import Selected
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="modal-settings" onclick="closeModal('modal-settings')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>API Settings</h3>
+        <button class="modal-close" onclick="closeModal('modal-settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Your API key is stored locally in your browser and never sent to any server.
+        </div>
+        <div class="form-group">
+          <label for="settings-deepseek-key">DeepSeek API Key</label>
+          <div class="input-with-icon">
+            <input type="password" id="settings-deepseek-key" class="form-input" placeholder="sk-..." />
+            <button class="input-icon-btn" onclick="toggleKeyVisibility('settings-deepseek-key')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-settings')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
